@@ -17,12 +17,8 @@ public class BridgeService extends Service {
     private IBinder mBinder = new BridgeAIDL.Stub() {
 
         @Override
-        public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) throws RemoteException {
-
-        }
-
-        @Override
         public Response send(Request request) throws RemoteException {
+
 
             return null;
         }
@@ -30,6 +26,6 @@ public class BridgeService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 }
