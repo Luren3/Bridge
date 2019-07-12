@@ -5,18 +5,13 @@ package com.magicfrost.bridge.bean;
  */
 public class RequestBean {
 
-    //请求单例的全类名
-    private String className;
-
     //类名
-    private String resultClassName;
-
-    private String requestObject;
+    private String className;
 
     //返回方法名字
     private String methodName;
 
-    //    参数
+    //参数
     private RequestParameter[] requestParameter;
 
     public String getClassName() {
@@ -25,22 +20,6 @@ public class RequestBean {
 
     public void setClassName(String className) {
         this.className = className;
-    }
-
-    public String getResultClassName() {
-        return resultClassName;
-    }
-
-    public void setResultClassName(String resultClassName) {
-        this.resultClassName = resultClassName;
-    }
-
-    public String getRequestObject() {
-        return requestObject;
-    }
-
-    public void setRequestObject(String requestObject) {
-        this.requestObject = requestObject;
     }
 
     public String getMethodName() {

@@ -22,6 +22,10 @@ public class Response implements Parcelable {
         }
     };
 
+    public Response(String data) {
+        this.data = data;
+    }
+
     protected Response(Parcel in) {
         this.data = in.readString();
     }

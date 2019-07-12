@@ -22,6 +22,10 @@ public class Request implements Parcelable {
         }
     };
 
+    public Request(String data) {
+        this.data = data;
+    }
+
     protected Request(Parcel in) {
         this.data = in.readString();
     }

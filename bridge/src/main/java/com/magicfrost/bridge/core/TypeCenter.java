@@ -30,18 +30,18 @@ public class TypeCenter {
 
     public void register(Class<?> clazz, Class<?> clazzImpl) {
         //注册--》类， 注册--》方法
-        registerClass(clazz);
-        registerMethod(clazzImpl);
+        registerClass(clazz, clazzImpl);
+        registerMethod(clazz, clazzImpl);
     }
 
     //缓存class
-    private void registerClass(Class<?> clazz) {
+    private void registerClass(Class<?> clazz, Class<?> clazzImpl) {
         String name = clazz.getName();
-        mClazz.putIfAbsent(name, clazz);
+        mClazz.putIfAbsent(name, clazzImpl);
     }
 
-    private void registerMethod(Class<?> clazz) {
-        Method[] methods = clazz.getMethods();
+    private void registerMethod(Class<?> clazz, Class<?> clazzImpl) {
+        Method[] methods = clazzImpl.getMethods();
         for (Method method : methods) {
             mMethods.putIfAbsent(clazz, new ConcurrentHashMap<String, Method>());
             ConcurrentHashMap<String, Method> map = mMethods.get(clazz);
@@ -55,13 +55,6 @@ public class TypeCenter {
             return null;
         }
         Class<?> clazz = mClazz.get(name);
-        if (clazz == null) {
-            try {
-                clazz = Class.forName(name);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
         return clazz;
     }
 

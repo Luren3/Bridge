@@ -6,6 +6,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.magicfrost.bridge.BridgeAIDL;
+import com.magicfrost.bridge.bean.ResponseMake;
 import com.magicfrost.bridge.internal.Request;
 import com.magicfrost.bridge.internal.Response;
 
@@ -18,9 +19,8 @@ public class BridgeService extends Service {
 
         @Override
         public Response send(Request request) throws RemoteException {
-
-
-            return null;
+            ResponseMake responseMake = new ResponseMake();
+            return responseMake.makeResponse(request);
         }
     };
 
