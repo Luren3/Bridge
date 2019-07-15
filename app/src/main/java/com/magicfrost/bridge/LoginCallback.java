@@ -1,11 +1,16 @@
 package com.magicfrost.bridge;
 
+import android.os.Bundle;
+
+import com.magicfrost.bridge.core.BaseCallback;
+
 /**
  * Created by huangwei on 2019-07-12.
  */
-public interface LoginCallback {
+public abstract class LoginCallback extends BaseCallback {
 
-    void onSuccess(String str);
+    @Override
+    public void onSucceed(Bundle result) {
 
-    void onFailed(int code, String msd);
+    }
 }

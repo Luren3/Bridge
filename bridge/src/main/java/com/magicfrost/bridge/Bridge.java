@@ -81,17 +81,25 @@ public class Bridge {
 
         //set参数
         RequestParameter[] requestParameters = null;
+        com.magicfrost.bridge.IPCCallback.Stub callback = null;
         if (args != null && args.length > 0) {
             requestParameters = new RequestParameter[args.length];
+
             for (int i = 0; i < args.length; i++) {
                 Object parameter = args[i];
                 String parameterClassName = parameter.getClass().getName();
-
                 Class aClass = parameter.getClass();
-                String parameterValue = gson.toJson(parameter);
-
-                RequestParameter requestParameter = new RequestParameter(parameterClassName, parameterValue);
-                requestParameters[i] = requestParameter;
+                if (aClass.isAnonymousClass()) {
+                    callback = (com.magicfrost.bridge.IPCCallback.Stub) parameter;
+                    String parameterValue = gson.toJson(parameter);
+                    RequestParameter requestParameter = new RequestParameter(parameterClassName, parameterValue);
+                    requestParameter.setAnonymousClass(true);
+                    requestParameters[i] = requestParameter;
+                } else {
+                    String parameterValue = gson.toJson(parameter);
+                    RequestParameter requestParameter = new RequestParameter(parameterClassName, parameterValue);
+                    requestParameters[i] = requestParameter;
+                }
             }
         }
 
@@ -101,6 +109,11 @@ public class Bridge {
 
         Request request = new Request(gson.toJson(requestBean));
 
-        return connectionManager.request(request);
+        if (callback != null) {
+            connectionManager.request(request, callback);
+        } else {
+            return connectionManager.request(request);
+        }
+        return null;
     }
 }

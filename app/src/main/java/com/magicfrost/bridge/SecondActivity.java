@@ -8,6 +8,8 @@ import android.widget.Button;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.magicfrost.bridge.core.BaseCallback;
+
 /**
  * Created by huangwei on 2019-07-12.
  */
@@ -27,20 +29,28 @@ public class SecondActivity extends AppCompatActivity {
         loginBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LoginCallback ds = new LoginCallback() {
+//                login.login("123", "3232", new com.magicfrost.bridge.IPCCallback.Stub() {
+//                    @Override
+//                    public void onSuccess(Bundle result) throws RemoteException {
+//                        Log.e("onSuccess","----");
+//                    }
+//
+//                    @Override
+//                    public void onFail(int code, String msg) throws RemoteException {
+//                        Log.e("onFail","----");
+//                    }
+//                });
+                login.login("", "3232", new BaseCallback() {
                     @Override
-                    public void onSuccess(String str) {
-
+                    public void onSucceed(Bundle result) {
+                        Log.e("onSuccess", "----");
                     }
 
                     @Override
-                    public void onFailed(int code, String msd) {
-
+                    public void onFailed(int code, String msg) {
+                        Log.e("onFail", "----" + code + "," + msg);
                     }
-                };
-                Log.e("dsds", "" + ds);
-                login.login("18667667150", "123", ds);
-//                login.test(new Test("123"));
+                });
             }
         });
     }

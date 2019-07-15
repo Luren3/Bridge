@@ -1,6 +1,7 @@
 package com.magicfrost.bridge.bean;
 
 import com.google.gson.Gson;
+import com.magicfrost.bridge.IPCCallback;
 import com.magicfrost.bridge.core.TypeCenter;
 import com.magicfrost.bridge.internal.Request;
 import com.magicfrost.bridge.internal.Response;
@@ -70,5 +71,40 @@ public class ResponseMake {
         Response response = new Response(data);
 
         return response;
+    }
+
+    public void makeResponse(Request request, IPCCallback callback) {
+        RequestBean requestBean = gson.fromJson(request.getData(), RequestBean.class);
+        resultClass = typeCenter.getClassType(requestBean.getClassName());
+        RequestParameter[] requestParameters = requestBean.getRequestParameter();
+        if (requestParameters != null && requestParameters.length > 0) {
+            mParameters = new Object[requestParameters.length];
+            for (int i = 0; i < requestParameters.length; i++) {
+                RequestParameter requestParameter = requestParameters[i];
+
+                try {
+                    if (requestParameter.isAnonymousClass()) {
+                        mParameters[i] = callback;
+                    } else {
+                        Class<?> clazz = Class.forName(requestParameter.getParameterClassName());
+                        mParameters[i] = gson.fromJson(requestParameter.getParameterValue(), clazz);
+                    }
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            mParameters = new Object[0];
+        }
+
+        setMethod(requestBean);
+
+        Object resultObject = invokeMethod();
+
+        ResponseBean responseBean = new ResponseBean(resultObject);
+
+        String data = gson.toJson(responseBean);
+
+        Response response = new Response(data);
     }
 }

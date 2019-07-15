@@ -9,6 +9,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.magicfrost.bridge.BridgeAIDL;
+import com.magicfrost.bridge.IPCCallback;
 import com.magicfrost.bridge.internal.Request;
 import com.magicfrost.bridge.internal.Response;
 import com.magicfrost.bridge.service.BridgeService;
@@ -91,5 +92,19 @@ public class ServiceConnectionManager {
             }
         }
         return response;
+    }
+
+    public void request(final Request request, IPCCallback callback) {
+
+        Log.e("dsdsd", "1-" + callback);
+        if (bridgeAIDL == null) {
+            bind(mContext);
+        } else {
+            try {
+                bridgeAIDL.sendForCallback(request, callback);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

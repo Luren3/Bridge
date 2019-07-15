@@ -7,8 +7,10 @@ public class RequestParameter {
 
     private String parameterClassName;
     private String parameterValue;
+    private boolean isAnonymousClass;
 
     public RequestParameter() {
+
     }
 
     public RequestParameter(String parameterClassName, String parameterValue) {
@@ -30,5 +32,13 @@ public class RequestParameter {
 
     public void setParameterValue(String parameterValue) {
         this.parameterValue = parameterValue;
+    }
+
+    public boolean isAnonymousClass() {
+        return isAnonymousClass;
+    }
+
+    public void setAnonymousClass(boolean anonymousClass) {
+        isAnonymousClass = anonymousClass;
     }
 }
