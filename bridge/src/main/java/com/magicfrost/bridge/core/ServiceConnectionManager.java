@@ -155,9 +155,14 @@ public class ServiceConnectionManager {
             try {
                 bridgeAIDL.registerReceiver(mContext.getPackageName(), new BridgeReceiver.Stub() {
                     @Override
-                    public void onReceive(Bundle message) throws RemoteException {
+                    public void onReceive(final Bundle message) throws RemoteException {
                         if (listener != null) {
-                            listener.onReceived(message);
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    listener.onReceived(message);
+                                }
+                            });
                         }
                     }
                 });
