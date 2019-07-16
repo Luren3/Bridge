@@ -1,5 +1,8 @@
 package com.magicfrost.bridge.bean;
 
+/**
+ * Created by MagicFrost on 2019-07-12.
+ */
 public class ResponseBean {
 
     private Object data;

@@ -2,6 +2,9 @@ package com.magicfrost.bridge.utils;
 
 import java.lang.reflect.Method;
 
+/**
+ * Created by MagicFrost on 2019-07-12.
+ */
 public class TypeUtils {
 
     public static String getMethodId(Method method) {
@@ -106,8 +109,7 @@ public class TypeUtils {
             if (method.getName().equals(methodName) && classAssignable(method.getParameterTypes(), parameterTypes)) {
                 if (result == null) {
                     result = method;
-                } else {
-
+                    break;
                 }
             }
         }

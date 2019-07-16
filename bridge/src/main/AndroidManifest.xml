@@ -4,6 +4,10 @@
     <application>
         <service
             android:name=".service.BridgeService"
-            android:exported="true" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.magicfrost.bridge.service.BridgeService" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

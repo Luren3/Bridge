@@ -77,6 +77,9 @@ public class TypeCenter {
                     paramters[i] = getClassType(requestParameters[i].getParameterClassName());
                 }
             }
+            if (paramters == null) {
+                paramters = new Class[0];
+            }
             method = TypeUtils.getMethod(clazz, methodName.substring(0, pos), paramters);
             methods.put(methodName, method);
             return method;

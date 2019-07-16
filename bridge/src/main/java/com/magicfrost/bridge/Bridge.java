@@ -1,11 +1,14 @@
 package com.magicfrost.bridge;
 
 import android.content.Context;
+import android.os.Bundle;
 
 import com.google.gson.Gson;
 import com.magicfrost.bridge.bean.RequestBean;
 import com.magicfrost.bridge.bean.RequestParameter;
+import com.magicfrost.bridge.core.BaseCallback;
 import com.magicfrost.bridge.core.BridgeInvocationHandler;
+import com.magicfrost.bridge.core.ReceiverListener;
 import com.magicfrost.bridge.core.ServiceConnectionManager;
 import com.magicfrost.bridge.core.TypeCenter;
 import com.magicfrost.bridge.internal.Request;
@@ -53,21 +56,27 @@ public class Bridge {
         typeCenter.register(service, serviceImpl);
     }
 
-    public void connectService() {
+    public void connectService(String serverPackageName) {
         if (mContext == null) {
             throw new IllegalThreadStateException("Bridge not init");
         }
 
-        connectionManager.bind(mContext);
+        connectionManager.bind(mContext, serverPackageName);
     }
 
     public <T> T getRemoteService(Class<?> service) {
+        if (mContext == null) {
+            throw new IllegalThreadStateException("Bridge not init");
+        }
         T proxy = (T) Proxy.newProxyInstance(service.getClassLoader(), new Class<?>[]{service},
                 new BridgeInvocationHandler(service));
         return proxy;
     }
 
     public Response request(Class<?> clazz, Method method, Object[] args) {
+        if (mContext == null) {
+            throw new IllegalThreadStateException("Bridge not init");
+        }
 
         RequestBean requestBean = new RequestBean();
 
@@ -81,7 +90,7 @@ public class Bridge {
 
         //set参数
         RequestParameter[] requestParameters = null;
-        com.magicfrost.bridge.IPCCallback.Stub callback = null;
+        BaseCallback.Stub callback = null;
         if (args != null && args.length > 0) {
             requestParameters = new RequestParameter[args.length];
 
@@ -90,7 +99,7 @@ public class Bridge {
                 String parameterClassName = parameter.getClass().getName();
                 Class aClass = parameter.getClass();
                 if (aClass.isAnonymousClass()) {
-                    callback = (com.magicfrost.bridge.IPCCallback.Stub) parameter;
+                    callback = (BaseCallback.Stub) parameter;
                     String parameterValue = gson.toJson(parameter);
                     RequestParameter requestParameter = new RequestParameter(parameterClassName, parameterValue);
                     requestParameter.setAnonymousClass(true);
@@ -115,5 +124,26 @@ public class Bridge {
             return connectionManager.request(request);
         }
         return null;
+    }
+
+    public void registerReceiver(ReceiverListener listener) {
+        if (mContext == null) {
+            throw new IllegalThreadStateException("Bridge not init");
+        }
+        connectionManager.registerReceiver(listener);
+    }
+
+    public void unregisterReceiver(ReceiverListener listener) {
+        if (mContext == null) {
+            throw new IllegalThreadStateException("Bridge not init");
+        }
+        connectionManager.unregisterReceiver(listener);
+    }
+
+    public void setMessage(Bundle message) {
+        if (mContext == null) {
+            throw new IllegalThreadStateException("Bridge not init");
+        }
+        BridgeManager.getInstance().notifyReceiver(message);
     }
 }

@@ -4,35 +4,47 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.magicfrost.bridge.BridgeAIDL;
-import com.magicfrost.bridge.IPCCallback;
+import com.magicfrost.bridge.BridgeCallback;
+import com.magicfrost.bridge.BridgeReceiver;
 import com.magicfrost.bridge.internal.Request;
 import com.magicfrost.bridge.internal.Response;
-import com.magicfrost.bridge.service.BridgeService;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by MagicFrost on 2019-07-10.
  */
 public class ServiceConnectionManager {
 
+    private final static String TAG = "Bridge";
+    private static final String BIND_SERVICE_ACTION = "com.magicfrost.bridge.service.BridgeService";
+    private final static Object lock = new Object();
     private volatile static ServiceConnectionManager instance;
-
+    private static ExecutorService threadPool = Executors.newFixedThreadPool(5);
     private BridgeAIDL bridgeAIDL;
-
     private Context mContext;
+    private String serverPackageName = "";
+    private ConnectHandler handler = new ConnectHandler(Looper.getMainLooper());
 
+    private ReceiverListener listener;
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
         public void binderDied() {
-            Log.e("Bridge", "Bridge 与远程服务断开连接");
-            bind(mContext);
+            Log.e(TAG, "Bridge 与远程服务断开连接");
+            bridgeAIDL = null;
+            bind(mContext, serverPackageName);
         }
     };
-
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -42,7 +54,14 @@ public class ServiceConnectionManager {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            Log.e("Bridge", "Bridge 连接远程服务成功");
+            synchronized (lock) {
+                lock.notifyAll();
+            }
+            handler.removeCallbacksAndMessages(null);
+            if (listener != null) {
+                registerReceiver(listener);
+            }
+            Log.e(TAG, "Bridge 连接远程服务成功");
         }
 
         @Override
@@ -70,11 +89,14 @@ public class ServiceConnectionManager {
         mContext = context;
     }
 
-    public void bind(Context context) {
+    public void bind(Context context, String serverPackageName) {
         if (mContext == null) {
             mContext = context;
         }
-        Intent intent = new Intent(context, BridgeService.class);
+        this.serverPackageName = serverPackageName;
+        Intent intent = new Intent();
+        intent.setPackage(serverPackageName);
+        intent.setAction(BIND_SERVICE_ACTION);
         context.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -83,7 +105,7 @@ public class ServiceConnectionManager {
         Response response = null;
 
         if (bridgeAIDL == null) {
-            bind(mContext);
+            bind(mContext, serverPackageName);
         } else {
             try {
                 response = bridgeAIDL.send(request);
@@ -94,16 +116,84 @@ public class ServiceConnectionManager {
         return response;
     }
 
-    public void request(final Request request, IPCCallback callback) {
+    public void request(final Request request, final BridgeCallback callback) {
 
-        Log.e("dsdsd", "1-" + callback);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (lock) {
+                    if (bridgeAIDL == null) {
+                        bind(mContext, serverPackageName);
+                        try {
+                            handler.sendEmptyMessageDelayed(1, 5000);
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    if (bridgeAIDL != null) {
+                        try {
+                            bridgeAIDL.sendForCallback(request, callback);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+
+        threadPool.execute(thread);
+    }
+
+    public void registerReceiver(final ReceiverListener listener) {
+
+        this.listener = listener;
         if (bridgeAIDL == null) {
-            bind(mContext);
+            bind(mContext, serverPackageName);
         } else {
             try {
-                bridgeAIDL.sendForCallback(request, callback);
+                bridgeAIDL.registerReceiver(mContext.getPackageName(), new BridgeReceiver.Stub() {
+                    @Override
+                    public void onReceive(Bundle message) throws RemoteException {
+                        if (listener != null) {
+                            listener.onReceived(message);
+                        }
+                    }
+                });
             } catch (RemoteException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    public void unregisterReceiver(ReceiverListener listener) {
+
+        this.listener = null;
+        if (bridgeAIDL == null) {
+            bind(mContext, serverPackageName);
+        } else {
+            try {
+                bridgeAIDL.unregisterReceiver(mContext.getPackageName());
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class ConnectHandler extends Handler {
+
+        public ConnectHandler(Looper mainLooper) {
+            super(mainLooper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == 1) {
+                synchronized (lock) {
+                    lock.notifyAll();
+                }
             }
         }
     }

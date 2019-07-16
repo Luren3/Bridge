@@ -5,6 +5,6 @@ package com.magicfrost.bridge;
  */
 public interface ILogin {
 
-    public void login(String mobile, String password, com.magicfrost.bridge.IPCCallback callback);
+    public void login(String mobile, String password, com.magicfrost.bridge.BridgeCallback callback);
 
 }

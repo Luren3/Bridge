@@ -8,8 +8,6 @@ import android.os.Parcelable;
  */
 public class Request implements Parcelable {
 
-    private String data;
-
     public static final Creator<Request> CREATOR = new Creator<Request>() {
         @Override
         public Request createFromParcel(Parcel in) {
@@ -21,6 +19,7 @@ public class Request implements Parcelable {
             return new Request[size];
         }
     };
+    private String data;
 
     public Request(String data) {
         this.data = data;

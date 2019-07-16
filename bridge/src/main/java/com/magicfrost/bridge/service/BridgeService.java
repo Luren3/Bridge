@@ -4,12 +4,11 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 
 import com.magicfrost.bridge.BridgeAIDL;
-import com.magicfrost.bridge.IPCCallback;
-import com.magicfrost.bridge.Receiver;
-import com.magicfrost.bridge.bean.ResponseMake;
+import com.magicfrost.bridge.BridgeCallback;
+import com.magicfrost.bridge.BridgeManager;
+import com.magicfrost.bridge.BridgeReceiver;
 import com.magicfrost.bridge.internal.Request;
 import com.magicfrost.bridge.internal.Response;
 
@@ -22,30 +21,33 @@ public class BridgeService extends Service {
 
         @Override
         public Response send(Request request) throws RemoteException {
-            ResponseMake responseMake = new ResponseMake();
-            return responseMake.makeResponse(request);
+            return BridgeManager.getInstance().send(request);
         }
 
         @Override
-        public void sendForCallback(Request request, IPCCallback callback) throws RemoteException {
-            Log.e("dsdsd", "2-" + callback);
-            ResponseMake responseMake = new ResponseMake();
-            responseMake.makeResponse(request, callback);
+        public void sendForCallback(Request request, BridgeCallback callback) throws RemoteException {
+            BridgeManager.getInstance().sendForCallback(request, callback);
         }
 
         @Override
-        public void registerReceiver(Receiver receiver) throws RemoteException {
-
+        public void registerReceiver(String packageName, BridgeReceiver receiver) throws RemoteException {
+            BridgeManager.getInstance().registerReceiver(packageName, receiver);
         }
 
         @Override
-        public void unregisterReceiver(Receiver receiver) throws RemoteException {
-
+        public void unregisterReceiver(String packageName) throws RemoteException {
+            BridgeManager.getInstance().unregisterReceiver(packageName);
         }
     };
 
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        BridgeManager.getInstance().cleanReceiver();
     }
 }

@@ -5,10 +5,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 
-import com.magicfrost.bridge.IPCCallback;
+import com.magicfrost.bridge.BridgeCallback;
 
-
-public abstract class BaseCallback extends IPCCallback.Stub {
+/**
+ * Created by MagicFrost on 2019-07-15.
+ */
+public abstract class BaseCallback extends BridgeCallback.Stub {
 
     private Handler handler = new Handler(Looper.getMainLooper());
 

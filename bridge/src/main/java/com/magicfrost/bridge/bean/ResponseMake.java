@@ -1,7 +1,7 @@
 package com.magicfrost.bridge.bean;
 
 import com.google.gson.Gson;
-import com.magicfrost.bridge.IPCCallback;
+import com.magicfrost.bridge.BridgeCallback;
 import com.magicfrost.bridge.core.TypeCenter;
 import com.magicfrost.bridge.internal.Request;
 import com.magicfrost.bridge.internal.Response;
@@ -9,6 +9,9 @@ import com.magicfrost.bridge.internal.Response;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Created by MagicFrost on 2019-07-12.
+ */
 public class ResponseMake {
 
     private Class<?> resultClass;
@@ -73,7 +76,7 @@ public class ResponseMake {
         return response;
     }
 
-    public void makeResponse(Request request, IPCCallback callback) {
+    public void makeResponse(Request request, BridgeCallback callback) {
         RequestBean requestBean = gson.fromJson(request.getData(), RequestBean.class);
         resultClass = typeCenter.getClassType(requestBean.getClassName());
         RequestParameter[] requestParameters = requestBean.getRequestParameter();
@@ -99,12 +102,6 @@ public class ResponseMake {
 
         setMethod(requestBean);
 
-        Object resultObject = invokeMethod();
-
-        ResponseBean responseBean = new ResponseBean(resultObject);
-
-        String data = gson.toJson(responseBean);
-
-        Response response = new Response(data);
+        invokeMethod();
     }
 }

@@ -8,8 +8,6 @@ import android.os.Parcelable;
  */
 public class Response implements Parcelable {
 
-    private String data;
-
     public static final Creator<Response> CREATOR = new Creator<Response>() {
         @Override
         public Response createFromParcel(Parcel in) {
@@ -21,6 +19,7 @@ public class Response implements Parcelable {
             return new Response[size];
         }
     };
+    private String data;
 
     public Response(String data) {
         this.data = data;

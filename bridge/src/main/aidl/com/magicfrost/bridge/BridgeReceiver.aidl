@@ -1,10 +1,9 @@
-// IPCCallback.aidl
+// Receiver.aidl
 package com.magicfrost.bridge;
 import android.os.Bundle;
 // Declare any non-default types here with import statements
 
-interface IPCCallback {
-    void onSuccess(in Bundle result);
+interface BridgeReceiver {
 
-    void onFail(int code,String msg);
+    void onReceive(in Bundle message);
 }

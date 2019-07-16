@@ -8,19 +8,24 @@ import android.widget.Button;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.magicfrost.bridge.core.BaseCallback;
-
 /**
- * Created by huangwei on 2019-07-12.
+ * Created by MagicFrost on 2019-07-12.
  */
 public class SecondActivity extends AppCompatActivity {
+
+    private LoginListener listener = new LoginListener() {
+        @Override
+        void loginSuccess() {
+            Log.e("loginSuccess", "----");
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
 
-        Bridge.getInstance().connectService();
+        Bridge.getInstance().connectService("com.magicfrost.bridge");
 
         Button loginBt = findViewById(R.id.login);
 
@@ -40,18 +45,25 @@ public class SecondActivity extends AppCompatActivity {
 //                        Log.e("onFail","----");
 //                    }
 //                });
-                login.login("", "3232", new BaseCallback() {
+                login.login("1889", "3232", new LoginCallback() {
                     @Override
-                    public void onSucceed(Bundle result) {
+                    void onLoginSuccess() {
                         Log.e("onSuccess", "----");
                     }
 
                     @Override
-                    public void onFailed(int code, String msg) {
-                        Log.e("onFail", "----" + code + "," + msg);
+                    void onError(String msg) {
+                        Log.e("onError", "----" + msg);
                     }
                 });
             }
         });
+        Bridge.getInstance().registerReceiver(listener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Bridge.getInstance().unregisterReceiver(listener);
     }
 }
