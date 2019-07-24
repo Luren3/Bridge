@@ -50,6 +50,8 @@ public class Bridge {
         typeCenter = TypeCenter.getInstance();
         connectionManager = ServiceConnectionManager.getInstance();
         connectionManager.init(context);
+
+
     }
 
     public void registerService(Class<?> service, Class<?> serviceImpl) {

@@ -1,5 +1,7 @@
 package com.magicfrost.bridge.bean;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.magicfrost.bridge.BridgeCallback;
 import com.magicfrost.bridge.core.TypeCenter;
@@ -46,6 +48,10 @@ public class ResponseMake {
     public Response makeResponse(Request request) {
         RequestBean requestBean = gson.fromJson(request.getData(), RequestBean.class);
         resultClass = typeCenter.getClassType(requestBean.getClassName());
+        if (resultClass == null) {
+            Log.e("Bridge", "Sever not found class service,Please check if it is registered, or if it is under the same package name");
+            return null;
+        }
         RequestParameter[] requestParameters = requestBean.getRequestParameter();
         if (requestParameters != null && requestParameters.length > 0) {
             mParameters = new Object[requestParameters.length];

@@ -19,7 +19,7 @@ public class MyApplication extends Application {
         Bridge.getInstance().registerReceiver(new LoginListener() {
             @Override
             void loginSuccess() {
-                Log.e("loginSuccess", "----");
+                Log.e("MyApplication", "----loginSuccess");
             }
         });
     }

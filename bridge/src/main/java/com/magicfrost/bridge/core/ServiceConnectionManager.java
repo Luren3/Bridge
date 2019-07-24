@@ -18,6 +18,7 @@ import com.magicfrost.bridge.BridgeReceiver;
 import com.magicfrost.bridge.internal.Request;
 import com.magicfrost.bridge.internal.Response;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,7 +31,7 @@ public class ServiceConnectionManager {
     private static final String BIND_SERVICE_ACTION = "com.magicfrost.bridge.service.BridgeService";
     private final static Object lock = new Object();
     private volatile static ServiceConnectionManager instance;
-    private static ExecutorService threadPool = Executors.newFixedThreadPool(5);
+    private ExecutorService threadPool = Executors.newFixedThreadPool(5);
     private BridgeAIDL bridgeAIDL;
     private Context mContext;
     private String serverPackageName = "";
@@ -118,7 +119,9 @@ public class ServiceConnectionManager {
 
     public void request(final Request request, final BridgeCallback callback) {
 
-        Thread thread = new Thread(new Runnable() {
+        final WeakReference<BridgeCallback> callbackWeakReference = new WeakReference<>(callback);
+
+        Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 synchronized (lock) {
@@ -134,16 +137,18 @@ public class ServiceConnectionManager {
 
                     if (bridgeAIDL != null) {
                         try {
-                            bridgeAIDL.sendForCallback(request, callback);
+                            if (callbackWeakReference.get() != null) {
+                                bridgeAIDL.sendForCallback(request, callbackWeakReference.get());
+                            }
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }
                     }
                 }
             }
-        });
+        };
 
-        threadPool.execute(thread);
+        threadPool.execute(runnable);
     }
 
     public void registerReceiver(final ReceiverListener listener) {

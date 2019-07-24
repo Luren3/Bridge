@@ -17,9 +17,12 @@ public class Login implements ILogin {
             Bundle bundle = new Bundle();
             bundle.putString("success", "success");
             try {
+                Thread.sleep(2000);
                 callback.onSuccess(bundle);
                 Bridge.getInstance().setMessage(bundle);
             } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         } else {
